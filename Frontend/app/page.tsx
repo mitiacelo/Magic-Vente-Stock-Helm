@@ -1,7 +1,7 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -11,15 +11,29 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { login, saveSession } from "@/lib/api";
 
 export default function Home() {
   const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [pseudo, setPseudo] = useState("Aragorn_II");
+  const [motDePasse, setMotDePasse] = useState("anduril");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log("submit");
-    router.push("/dashboard");
+    setError(null);
+    setLoading(true);
+    try {
+      const session = await login(pseudo, motDePasse);
+      saveSession(session);
+      router.push("/dashboard");
+    } catch {
+      setError("Pseudo ou mot de passe incorrect.");
+      setLoading(false);
+    }
   };
 
   return (
@@ -106,7 +120,8 @@ export default function Home() {
                       name="pseudo"
                       type="text"
                       autoComplete="username"
-                      defaultValue="Aragorn_II"
+                      value={pseudo}
+                      onChange={(e) => setPseudo(e.target.value)}
                       className="h-11 rounded-sm border-border/80 bg-background/60 font-serif text-base"
                     />
                   </div>
@@ -123,16 +138,24 @@ export default function Home() {
                       name="motdepasse"
                       type="password"
                       autoComplete="current-password"
-                      defaultValue="andúril"
+                      value={motDePasse}
+                      onChange={(e) => setMotDePasse(e.target.value)}
                       className="h-11 rounded-sm border-border/80 bg-background/60 font-serif text-base"
                     />
                   </div>
 
+                  {error && (
+                    <p className="font-serif italic text-sm text-red-700/90 text-center">
+                      {error}
+                    </p>
+                  )}
+
                   <button
                     type="submit"
-                    className="mt-4 h-12 w-full rounded-sm bg-primary text-primary-foreground font-display text-xs tracking-[0.32em] uppercase hover:bg-primary/90"
+                    disabled={loading}
+                    className="mt-4 h-12 w-full rounded-sm bg-primary text-primary-foreground font-display text-xs tracking-[0.32em] uppercase hover:bg-primary/90 disabled:opacity-60"
                   >
-                    S&apos;identifier&nbsp;&nbsp;→
+                    {loading ? "Identification…" : "S'identifier  →"}
                   </button>
                 </form>
               </CardContent>

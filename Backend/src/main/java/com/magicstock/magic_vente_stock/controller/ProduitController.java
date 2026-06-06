@@ -25,6 +25,17 @@ public class ProduitController {
         return ResponseEntity.ok(produitService.findAll());
     }
 
+    @GetMapping("/du-jour")
+    public ResponseEntity<?> produitDuJour() {
+        Optional<Produit> produit = produitService.produitDuJour();
+        if (produit.isPresent()) {
+            return ResponseEntity.ok(produit.get());
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Aucun produit du jour disponible.");
+        }
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> findById(@PathVariable Integer id) {
         Optional<Produit> produit = produitService.findById(id);

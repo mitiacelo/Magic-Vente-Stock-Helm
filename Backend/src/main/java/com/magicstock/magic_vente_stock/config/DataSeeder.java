@@ -37,15 +37,21 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seedClient() {
-        String pseudo = "Aragorn_II";
+        // Comptes de demo ; mots de passe hashes via BCrypt par ClientService.
+        seedClient("Aragorn", "Elessar", "Aragorn_II", "anduril");
+        seedClient("Legolas", "Vertefeuille", "Legolas_VF", "mirkwood");
+        seedClient("Gimli", "Gloin", "Gimli_fils_de_Gloin", "khazad");
+    }
+
+    private void seedClient(String prenom, String nom, String pseudo, String motDePasse) {
         if (clientRepository.existsByPseudo(pseudo)) {
             return;
         }
         SignupRequest request = new SignupRequest();
-        request.setPrenom("Aragorn");
-        request.setNom("Elessar");
+        request.setPrenom(prenom);
+        request.setNom(nom);
         request.setPseudo(pseudo);
-        request.setMotDePasse("anduril"); // mot de passe de demo, hashe via BCrypt
+        request.setMotDePasse(motDePasse);
         clientService.registerClient(request);
     }
 

@@ -1,6 +1,5 @@
 package com.magicstock.magic_vente_stock.service;
 
-
 import com.magicstock.magic_vente_stock.dto.LoginRequest;
 import com.magicstock.magic_vente_stock.dto.SignupRequest;
 import com.magicstock.magic_vente_stock.model.Client;
@@ -45,5 +44,9 @@ public class ClientService {
             }
         }
         return Optional.empty();
+    }
+
+    public Optional<Client> findByPseudo(String pseudo) {
+        return clientRepository.findByPseudo(pseudo);
     }
 }

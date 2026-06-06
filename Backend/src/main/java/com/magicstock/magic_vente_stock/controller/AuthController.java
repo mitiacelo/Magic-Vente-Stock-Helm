@@ -1,15 +1,17 @@
 package com.magicstock.magic_vente_stock.controller;
 
 
+import com.magicstock.magic_vente_stock.config.JwtService;
 import com.magicstock.magic_vente_stock.dto.LoginRequest;
 import com.magicstock.magic_vente_stock.dto.SignupRequest;
 import com.magicstock.magic_vente_stock.model.Client;
 import com.magicstock.magic_vente_stock.service.ClientService;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -17,9 +19,11 @@ import java.util.Optional;
 public class AuthController {
 
     private final ClientService clientService;
+    private final JwtService jwtService;
 
-    public AuthController(ClientService clientService) {
+    public AuthController(ClientService clientService, JwtService jwtService) {
         this.clientService = clientService;
+        this.jwtService = jwtService;
     }
 
     @PostMapping("/signup")
@@ -34,22 +38,25 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpSession session) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         Optional<Client> loggedInClient = clientService.loginClient(request);
 
         if (loggedInClient.isPresent()) {
             Client client = loggedInClient.get();
-            session.setAttribute("user", client.getPseudo());
+            String token = jwtService.generateToken(client.getPseudo());
             client.setMotDePasse(null);
-            return ResponseEntity.ok(client);
+
+            Map<String, Object> body = new HashMap<>();
+            body.put("client", client);
+            body.put("token", token);
+            return ResponseEntity.ok(body);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Identifiants de connexion incorrects.");
         }
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpSession session) {
-        session.invalidate();
+    public ResponseEntity<?> logout() {
         return ResponseEntity.ok("Déconnexion réussie.");
     }
 }
